@@ -1,4 +1,4 @@
-declare namespace Chess {
+declare namespace ChessInterfaces {
     interface FLAGS {
         NORMAL: 'n',
         CAPTURE: 'c',
@@ -44,7 +44,7 @@ interface ChessInstance {
     readonly QUEEN: string,
     readonly KING: string,
     readonly SQUARES: string[],
-    FLAGS: Chess.FLAGS,
+    FLAGS: ChessInterfaces.FLAGS,
 
     /***************************************************************************
      * PUBLIC API
@@ -52,8 +52,12 @@ interface ChessInstance {
     load(fen: string): boolean,
 
     reset(): void,
+    
+    // Documentation on github is for a newer version
+    // See https://github.com/jhlywa/chess.js/issues/140
+    // board(): ChessInterfaces.ChessPiece[][],
 
-    moves(options: string): string[] | Chess.Move[],
+    moves(options: string): string[] | ChessInterfaces.Move[],
 
     in_check(): boolean,
 
@@ -73,8 +77,6 @@ interface ChessInstance {
 
     fen(): string,
 
-    board(): Chess.ChessPiece[][],
-
     pgn(options?: { max_width?: number, newline_char: string }): string,
 
     load_pgn(pgn: string, options?: { newline_char?: string, sloppy?: boolean }): boolean,
@@ -83,23 +85,23 @@ interface ChessInstance {
 
     ascii(): string,
 
-    turn(): Chess.ChessPieceColor,
+    turn(): ChessInterfaces.ChessPieceColor,
 
-    move(move: string | Chess.Move, options?: { sloppy: boolean }): Chess.Move | null,
+    move(move: string | ChessInterfaces.Move, options?: { sloppy: boolean }): ChessInterfaces.Move | null,
 
-    undo(): Chess.Move | null,
+    undo(): ChessInterfaces.Move | null,
 
     clear(): void;
 
-    put(piece: Chess.ChessPiece, square: string): boolean,
+    put(piece: ChessInterfaces.ChessPiece, square: string): boolean,
 
-    get(square: string): Chess.ChessPiece,
+    get(square: string): ChessInterfaces.ChessPiece,
 
-    remove(square: string): Chess.ChessPiece,
+    remove(square: string): ChessInterfaces.ChessPiece,
 
     square_color(square: string): string | null,
 
-    history(options?:{ verbose: boolean }): string[] | Chess.Move[]
+    history(options?:{ verbose: boolean }): string[] | ChessInterfaces.Move[]
 }
 
 interface ChessFactory {

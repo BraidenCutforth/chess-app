@@ -7,6 +7,7 @@
     left: 10vh;
     top: 10vh;
     border: black solid 5px;
+    /* transform: rotate(180deg); */
 }
 
 .row{

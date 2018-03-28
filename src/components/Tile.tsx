@@ -29,6 +29,22 @@ class Tile extends React.Component<TileProps>{
     constructor(props: TileProps) {
         super(props);
     }
+
+    getImg():any{
+        if(this.props.piece === 'K'){ return WhiteKing }
+        else if(this.props.piece === 'Q'){ return WhiteQueen }
+        else if(this.props.piece === 'R'){ return WhiteRook }
+        else if(this.props.piece === 'N'){ return WhiteKnight }
+        else if(this.props.piece === 'B'){ return WhiteBishop }
+        else if(this.props.piece === 'P'){ return WhitePawn }
+        else if(this.props.piece === 'k'){ return BlackKing }
+        else if(this.props.piece === 'q'){ return BlackQueen }
+        else if(this.props.piece === 'r'){ return BlackRook }
+        else if(this.props.piece === 'n'){ return BlackKnight }
+        else if(this.props.piece === 'b'){ return BlackBishop }
+        else if(this.props.piece === 'p'){ return BlackPawn }
+    }
+
     render() {
 
         if (this.props.piece === 'K') {
