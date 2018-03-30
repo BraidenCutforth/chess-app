@@ -23,9 +23,9 @@ declare namespace ChessInterfaces {
     }
 
     interface Move {
-        color?: string,
         from: string,
         to: string,
+        color?: string,
         flags?: string,
         piece?: string,
         san?: string,
@@ -52,12 +52,12 @@ interface ChessInstance {
     load(fen: string): boolean,
 
     reset(): void,
-    
+
     // Documentation on github is for a newer version
     // See https://github.com/jhlywa/chess.js/issues/140
     // board(): ChessInterfaces.ChessPiece[][],
 
-    moves(options: string): string[] | ChessInterfaces.Move[],
+    moves(options?: { square?: string, verbose?:boolean }): string[] | ChessInterfaces.Move[],
 
     in_check(): boolean,
 

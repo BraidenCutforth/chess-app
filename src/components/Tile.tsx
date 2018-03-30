@@ -1,4 +1,5 @@
 // tslint:disable
+import { TileInfo } from './ChessBoard';
 import * as React from 'react';
 import '../css/Tile.css';
 // import { Router, Route } from 'react-router';
@@ -22,7 +23,8 @@ const BlackPawn = require('../img/black-pawn.svg');
 
 interface TileProps {
     cName: string,
-    piece: string
+    tileInfo: TileInfo,
+    onClick: () => void
 }
 
 class Tile extends React.Component<TileProps>{
@@ -30,102 +32,40 @@ class Tile extends React.Component<TileProps>{
         super(props);
     }
 
-    getImg():any{
-        if(this.props.piece === 'K'){ return WhiteKing }
-        else if(this.props.piece === 'Q'){ return WhiteQueen }
-        else if(this.props.piece === 'R'){ return WhiteRook }
-        else if(this.props.piece === 'N'){ return WhiteKnight }
-        else if(this.props.piece === 'B'){ return WhiteBishop }
-        else if(this.props.piece === 'P'){ return WhitePawn }
-        else if(this.props.piece === 'k'){ return BlackKing }
-        else if(this.props.piece === 'q'){ return BlackQueen }
-        else if(this.props.piece === 'r'){ return BlackRook }
-        else if(this.props.piece === 'n'){ return BlackKnight }
-        else if(this.props.piece === 'b'){ return BlackBishop }
-        else if(this.props.piece === 'p'){ return BlackPawn }
+    getImg(): any {
+        if (this.props.tileInfo.piece === 'K') { return WhiteKing }
+        else if (this.props.tileInfo.piece === 'Q') { return WhiteQueen }
+        else if (this.props.tileInfo.piece === 'R') { return WhiteRook }
+        else if (this.props.tileInfo.piece === 'N') { return WhiteKnight }
+        else if (this.props.tileInfo.piece === 'B') { return WhiteBishop }
+        else if (this.props.tileInfo.piece === 'P') { return WhitePawn }
+        else if (this.props.tileInfo.piece === 'k') { return BlackKing }
+        else if (this.props.tileInfo.piece === 'q') { return BlackQueen }
+        else if (this.props.tileInfo.piece === 'r') { return BlackRook }
+        else if (this.props.tileInfo.piece === 'n') { return BlackKnight }
+        else if (this.props.tileInfo.piece === 'b') { return BlackBishop }
+        else if (this.props.tileInfo.piece === 'p') { return BlackPawn }
+        else { return "" }
+    }
+
+    getHighlight = (): string => {
+        return this.props.tileInfo.highlight ? "highlight" : "";
     }
 
     render() {
-
-        if (this.props.piece === 'K') {
+        const piece = this.getImg();
+        if (piece) {
             return (
-                <div className={this.props.cName + " tile"}>
-                    <img src={WhiteKing} className="chess-piece" alt="White Queen" />
-                </div>
-            );
-        } else if (this.props.piece === 'Q') {
-            return (
-                <div className={this.props.cName + " tile"}>
-                    <img src={WhiteQueen} className="chess-piece" alt="White Queen" />
-                </div>
-            );
-        } else if (this.props.piece === 'R') {
-            return (
-                <div className={this.props.cName + " tile"}>
-                    <img src={WhiteRook} className="chess-piece" alt="White Rook" />
-                </div>
-            );
-        } else if (this.props.piece === 'B') {
-            return (
-                <div className={this.props.cName + " tile"}>
-                    <img src={WhiteBishop} className="chess-piece" alt="White Bishop" />
-                </div>
-            );
-        } else if (this.props.piece === 'N') {
-            return (
-                <div className={this.props.cName + " tile"}>
-                    <img src={WhiteKnight} className="chess-piece" alt="White Knight" />
-                </div>
-            );
-        } else if (this.props.piece === 'P') {
-            return (
-                <div className={this.props.cName + " tile"}>
-                    <img src={WhitePawn} className="chess-piece" alt="White Pawn" />
-                </div>
-            );
-        } else if (this.props.piece === 'k') {
-            return (
-                <div className={this.props.cName + " tile"}>
-                    <img src={BlackKing} className="chess-piece" alt="Black King" />
-                </div>
-            );
-        } else if (this.props.piece === 'q') {
-            return (
-                <div className={this.props.cName + " tile"}>
-                    <img src={BlackQueen} className="chess-piece" alt="Black Queen" />
-                </div>
-            );
-        } else if (this.props.piece === 'r') {
-            return (
-                <div className={this.props.cName + " tile"}>
-                    <img src={BlackRook} className="chess-piece" alt="Black Rook" />
-                </div>
-            );
-        } else if (this.props.piece === 'b') {
-            return (
-                <div className={this.props.cName + " tile"}>
-                    <img src={BlackBishop} className="chess-piece" alt="Black Bishop" />
-                </div>
-            );
-        } else if (this.props.piece === 'n') {
-            return (
-                <div className={this.props.cName + " tile"}>
-                    <img src={BlackKnight} className="chess-piece" alt="Black Knight" />
-                </div>
-            );
-        } else if (this.props.piece === 'p') {
-            return (
-                <div className={this.props.cName + " tile"}>
-                    <img src={BlackPawn} className="chess-piece" alt="Black Pawn" />
+                <div onClick={this.props.onClick} className={this.props.cName + " tile " + this.getHighlight()}>
+                    <img src={piece} className="chess-piece" alt="A Chess piece" />
                 </div>
             );
         } else {
             return (
-                <div className={this.props.cName + " tile"}>
+                <div onClick={this.props.onClick} className={this.props.cName + " tile " + this.getHighlight()}>
                 </div>
-            );
+            )
         }
-
     }
 }
 
