@@ -52,6 +52,20 @@ class Tile extends React.Component<TileProps>{
         return this.props.tileInfo.highlight ? "highlight" : "";
     }
 
+    // shouldComponentUpdate(nextProps: TileProps){
+    //     // console.log(this.props, nextProps);
+    //     if(nextProps.cName !== this.props.cName){
+    //         return true;
+    //     } else if(nextProps.tileInfo.highlight !== this.props.tileInfo.highlight) {
+    //         return true;
+    //     } else if (nextProps.tileInfo.piece !== this.props.tileInfo.piece){
+    //         return true;
+    //     } else {
+    //         console.log("No update");
+    //         return false;
+    //     }
+    // }
+
     render() {
         const piece = this.getImg();
         if (piece) {
