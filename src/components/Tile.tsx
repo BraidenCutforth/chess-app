@@ -77,7 +77,6 @@ class Tile extends React.Component<TileProps>{
      * are updated.
      */
     shouldComponentUpdate(nextProps: TileProps){
-        // console.log(this.props, nextProps);
         if(nextProps.cName !== this.props.cName){
             return true;
         } else if(nextProps.tileInfo.highlight !== this.props.tileInfo.highlight) {
