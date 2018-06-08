@@ -7,6 +7,9 @@ import '../css/Tile.css';
 //     odd: boolean,
 // }
 
+// Constants for all the piece SVG's
+// Taken from wikimedia commons
+// https://commons.wikimedia.org/wiki/Category:SVG_chess_pieces
 const WhiteKing = require('../img/white-king.svg');
 const WhiteQueen = require('../img/white-queen.svg');
 const WhiteRook = require('../img/white-rook.svg');
@@ -20,11 +23,11 @@ const BlackBishop = require('../img/black-bishop.svg');
 const BlackKnight = require('../img/black-knight.svg');
 const BlackPawn = require('../img/black-pawn.svg');
 
-
+// Properties for the tile
 interface TileProps {
-    cName: string,
-    tileInfo: TileInfo,
-    onClick: () => void
+    cName: string, //class name for the div
+    tileInfo: TileInfo, //tileInfo (highlight and piece)
+    onClick: () => void //onClick callback
 }
 
 class Tile extends React.Component<TileProps>{
@@ -32,6 +35,11 @@ class Tile extends React.Component<TileProps>{
         super(props);
     }
 
+    /* getImg
+     * Parameters: none
+     * Returns: SVG to be displayed in the tile
+     * Uppercase for white pieces, lowercase for black
+     */
     getImg(): any {
         if (this.props.tileInfo.piece === 'K') { return WhiteKing }
         else if (this.props.tileInfo.piece === 'Q') { return WhiteQueen }
@@ -48,10 +56,26 @@ class Tile extends React.Component<TileProps>{
         else { return "" }
     }
 
+    /* getHighlight
+     * Parameters: none
+     * Returns: string
+     * This function checks to see if the highlight property is set to true
+     * and returns "highlight" if it is to add that to the tiles class names
+     */
     getHighlight = (): string => {
         return this.props.tileInfo.highlight ? "highlight" : "";
     }
 
+    /* shouldComponentUpdate
+     * Parameters: nextProps
+     * Returns: boolean
+     * This is a default react function
+     * It is built to see if the new information coming in is different
+     * from what is currently being displayed.
+     * If it is the same it returns false, if it is different returns true.
+     * This was built for efficiency so only tiles that have been changed
+     * are updated.
+     */
     shouldComponentUpdate(nextProps: TileProps){
         // console.log(this.props, nextProps);
         if(nextProps.cName !== this.props.cName){
