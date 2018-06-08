@@ -44,6 +44,7 @@ class ChessBoard extends React.Component<{}, ChessBoardState> {
     constructor({ }: ChessBoardProps) {
         super({});
         const startState: TileInfo = { piece: "", highlight: false };
+        // Setup all chess tiles to be empty and not highlighted
         this.state = {
             a8: this.cloneTileInfo(startState), b8: this.cloneTileInfo(startState),
             c8: this.cloneTileInfo(startState), d8: this.cloneTileInfo(startState),
@@ -86,6 +87,12 @@ class ChessBoard extends React.Component<{}, ChessBoardState> {
 
     }
 
+    /* getMoves
+     * Parameter: Tile Coordinate
+     * Returns: Array of moves
+     * This function interacts with the chess.js library and converts the output,
+     * if necessary, to an array of moves.
+     */
     getMoves = (tileCoord: string): ChessInterfaces.Move[] => {
         let moves = this.chess.moves({ square: tileCoord, verbose: true });
         // console.log('chess: ', this.chess);
@@ -105,6 +112,14 @@ class ChessBoard extends React.Component<{}, ChessBoardState> {
         return returnVal;
     }
 
+    /* setHighlight
+     * Parameters: moves[], mutObj
+     * Returns: mutObj
+     * This function takes a list of moves and modifies the mutation object
+     * to add highligting to the tiles listed in the moves array.
+     * If a mutation object is passed in, that object is modified, otherwise
+     * it creates a new mutObj and returns that.
+     */
     setHighlight = (moves: ChessInterfaces.Move[], mutObj?: StateMutation) => {
         if (!mutObj) {
             mutObj = {};
@@ -126,6 +141,13 @@ class ChessBoard extends React.Component<{}, ChessBoardState> {
         return mutObj;
     }
 
+    /* clearHighlight
+     * Parameters: mutObj
+     * Returns: mutObj
+     * This function clears all highlighting that currently exists on any tiles.
+     * If a mutObj exists, it adds the changes to the existing object,
+     * otherwise a new mutObj is created.
+     */
     clearHighlight = (mutObj?: StateMutation) => {
         if (!mutObj) {
             mutObj = {};
@@ -147,6 +169,13 @@ class ChessBoard extends React.Component<{}, ChessBoardState> {
         return mutObj;
     }
 
+    /* getBoardFromFen
+     * Parameters: fen, mutObj
+     * This function takes a fen string (https://en.wikipedia.org/wiki/Forsyth–Edwards_Notation)
+     * and creates the board from that string.
+     * If a mutObj exists, it will add the changes there,
+     * otherwise a new object is created.
+     */
     getBoardFromFen = (fen: string, mutObj?: StateMutation) => {
         if (!mutObj) {
             mutObj = {};
@@ -181,21 +210,36 @@ class ChessBoard extends React.Component<{}, ChessBoardState> {
         return mutObj;
     }
 
+    /* cloneTileInfo
+     * Parameters: TileInfo
+     * Returns: Deep copy of TileInfo
+     */
     cloneTileInfo = (ti: TileInfo): TileInfo => {
         return ({ piece: ti.piece, highlight: ti.highlight });
     }
 
+    // React builtin function
     componentDidUpdate() {
         console.log("UPDATE");
     }
 
+    // React builtin function
     componentWillMount() {
         // tslint:disable-next-line:no-any
         this.setState(this.getBoardFromFen(this.chess.fen()) as any);
     }
 
+    /* onClick
+     * Parameters: tileCoord
+     * Returns: void
+     * This function is passed into all the Tile components.
+     * It acts as a callback for when a tile is clicked.
+     * In this function the behaviour of every click is defined.
+     */
     onClick = (tileCoord: string) => {
         console.log("onClick");
+        // If the clicked tile is in the list of currently possible moves
+        // Then perform that move
         if (((): boolean => {
             let result = false;
             for (let move of this.lastClick.moves) {
@@ -215,6 +259,8 @@ class ChessBoard extends React.Component<{}, ChessBoardState> {
                 this.setState(state as any);
             }
         } else if (this.lastClick.tile === tileCoord) {
+            // Else if the same tile is clicked
+            // Then clear the highlighting and set last clicked to null
             this.lastClick.tile = "";
             let state = this.clearHighlight();
             console.log("state2: ", state);
@@ -222,6 +268,9 @@ class ChessBoard extends React.Component<{}, ChessBoardState> {
             this.setState(state as any);
             // console.log('clearHighlight');
         } else {
+            // Else if a different tile is clicked, that isn't in moves
+            // Then make that the last clicked tiles and get the moves
+            // for that tile
             this.lastClick.tile = tileCoord;
             let state = this.clearHighlight();
             this.lastClick.moves = this.getMoves(tileCoord);
