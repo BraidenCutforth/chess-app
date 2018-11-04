@@ -7,21 +7,18 @@ import '../css/Tile.css';
 //     odd: boolean,
 // }
 
-// Constants for all the piece SVG's
-// Taken from wikimedia commons
-// https://commons.wikimedia.org/wiki/Category:SVG_chess_pieces
-const WhiteKing = require('../img/white-king.svg');
-const WhiteQueen = require('../img/white-queen.svg');
-const WhiteRook = require('../img/white-rook.svg');
-const WhiteBishop = require('../img/white-bishop.svg');
-const WhiteKnight = require('../img/white-knight.svg');
-const WhitePawn = require('../img/white-pawn.svg');
-const BlackKing = require('../img/black-king.svg');
-const BlackQueen = require('../img/black-queen.svg');
-const BlackRook = require('../img/black-rook.svg');
-const BlackBishop = require('../img/black-bishop.svg');
-const BlackKnight = require('../img/black-knight.svg');
-const BlackPawn = require('../img/black-pawn.svg');
+export const WhiteKing = require('../img/white-king.svg');
+export const WhiteQueen = require('../img/white-queen.svg');
+export const WhiteRook = require('../img/white-rook.svg');
+export const WhiteBishop = require('../img/white-bishop.svg');
+export const WhiteKnight = require('../img/white-knight.svg');
+export const WhitePawn = require('../img/white-pawn.svg');
+export const BlackKing = require('../img/black-king.svg');
+export const BlackQueen = require('../img/black-queen.svg');
+export const BlackRook = require('../img/black-rook.svg');
+export const BlackBishop = require('../img/black-bishop.svg');
+export const BlackKnight = require('../img/black-knight.svg');
+export const BlackPawn = require('../img/black-pawn.svg');
 
 // Properties for the tile
 interface TileProps {
@@ -77,7 +74,6 @@ class Tile extends React.Component<TileProps>{
      * are updated.
      */
     shouldComponentUpdate(nextProps: TileProps){
-        // console.log(this.props, nextProps);
         if(nextProps.cName !== this.props.cName){
             return true;
         } else if(nextProps.tileInfo.highlight !== this.props.tileInfo.highlight) {

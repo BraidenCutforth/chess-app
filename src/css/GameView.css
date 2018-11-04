@@ -1,0 +1,8 @@
+.BoardArea{
+    width: 80vh;
+    height: 80vh;
+    position: fixed;
+    left: 10vh;
+    top: 10vh;
+    border: black solid 5px;
+}
