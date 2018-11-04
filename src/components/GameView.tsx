@@ -11,9 +11,13 @@ interface GameViewState {
 
 class GameView extends React.Component<GameViewProps, GameViewState> {
 
+    constructor(props: GameViewProps) {
+        super(props);
+    }
+
     render() {
-        return(
-            <div className="GameView">
+        return (
+            <div className="BoardArea">
                 <ChessBoard />
             </div>
         );

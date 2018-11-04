@@ -1,7 +1,11 @@
 import * as React from "react";
 import "../css/ChessBoard.css";
-import Tile from "./Tile";
+import Tile, {
+    WhiteBishop, WhiteKnight, WhiteRook, WhiteQueen,
+    BlackBishop, BlackKnight, BlackRook, BlackQueen
+} from "./Tile";
 import * as ChessInterfaces from "chess.js";
+import Modal from "./Modal";
 
 export interface TileInfo {
     piece: string;
@@ -25,6 +29,7 @@ interface ChessBoardState {
     g5: TileInfo; g6: TileInfo; g7: TileInfo; g8: TileInfo;
     h1: TileInfo; h2: TileInfo; h3: TileInfo; h4: TileInfo;
     h5: TileInfo; h6: TileInfo; h7: TileInfo; h8: TileInfo;
+    showModal: boolean;
 }
 
 interface ChessBoardProps {
@@ -35,12 +40,15 @@ interface StateMutation {
     [key: string]: TileInfo;
 }
 
-class ChessBoard extends React.Component<{}, ChessBoardState> {
+class ChessBoard extends React.Component<ChessBoardProps, ChessBoardState> {
+
     chess: ChessInstance;
     lastClick: {
         tile: string,
         moves: ChessInterfaces.Move[];
+        promotionMove: string;
     };
+
     constructor({ }: ChessBoardProps) {
         super({});
         const startState: TileInfo = { piece: "", highlight: false };
@@ -77,12 +85,14 @@ class ChessBoard extends React.Component<{}, ChessBoardState> {
             a1: this.cloneTileInfo(startState), b1: this.cloneTileInfo(startState),
             c1: this.cloneTileInfo(startState), d1: this.cloneTileInfo(startState),
             e1: this.cloneTileInfo(startState), f1: this.cloneTileInfo(startState),
-            g1: this.cloneTileInfo(startState), h1: this.cloneTileInfo(startState)
+            g1: this.cloneTileInfo(startState), h1: this.cloneTileInfo(startState),
+            showModal: false
         };
         this.chess = new ChessInterfaces();
         this.lastClick = {
             tile: "",
-            moves: []
+            moves: [],
+            promotionMove: ""
         };
 
     }
@@ -112,14 +122,22 @@ class ChessBoard extends React.Component<{}, ChessBoardState> {
         return returnVal;
     }
 
-    /* setHighlight
-     * Parameters: moves[], mutObj
-     * Returns: mutObj
-     * This function takes a list of moves and modifies the mutation object
-     * to add highligting to the tiles listed in the moves array.
-     * If a mutation object is passed in, that object is modified, otherwise
-     * it creates a new mutObj and returns that.
-     */
+    validMove = (tileCoord: string) => {
+        let returnObj = {
+            valid: false,
+            promotion: false
+        };
+        for (let move of this.lastClick.moves) {
+            if (move.to === tileCoord) {
+                returnObj.valid = true;
+                if (move.promotion) {
+                    returnObj.promotion = true;
+                }
+            }
+        }
+        return returnObj;
+    }
+
     setHighlight = (moves: ChessInterfaces.Move[], mutObj?: StateMutation) => {
         if (!mutObj) {
             mutObj = {};
@@ -210,10 +228,29 @@ class ChessBoard extends React.Component<{}, ChessBoardState> {
         return mutObj;
     }
 
-    /* cloneTileInfo
-     * Parameters: TileInfo
-     * Returns: Deep copy of TileInfo
-     */
+    getPromotionPieces = () => {
+        const turn = this.chess.turn();
+        let pieces = [];
+        if (turn === "w") {
+            pieces.push(WhiteBishop, WhiteKnight, WhiteRook, WhiteQueen);
+        } else if (turn === "b") {
+            pieces.push(BlackBishop, BlackKnight, BlackRook, BlackQueen);
+        }
+        return pieces.map((piece) => {
+            return (<img src={piece} className="chess-piece" alt="A Chess piece" key={piece} />);
+        });
+    }
+
+    promotionMove = (promotion: string) => {
+        console.log(promotion);
+        let move: ChessInterfaces.Move = {
+            from: this.lastClick.tile,
+            to: this.lastClick.promotionMove,
+            promotion: promotion
+        };
+        this.chess.move(move);
+    }
+
     cloneTileInfo = (ti: TileInfo): TileInfo => {
         return ({ piece: ti.piece, highlight: ti.highlight });
     }
@@ -238,19 +275,15 @@ class ChessBoard extends React.Component<{}, ChessBoardState> {
      */
     onClick = (tileCoord: string) => {
         console.log("onClick");
-        // If the clicked tile is in the list of currently possible moves
-        // Then perform that move
-        if (((): boolean => {
-            let result = false;
-            for (let move of this.lastClick.moves) {
-                if (move.to === tileCoord) {
-                    result = true;
-                }
+        // If move is in the list of possible moves
+        let validMove = this.validMove(tileCoord);
+        if (validMove.valid) {
+            // Perform the move
+            if (validMove.promotion) {
+                this.lastClick.promotionMove = tileCoord;
             }
-            // console.log('result', result);
-            return result;
-        })()) {
-            // console.log('inMoves');
+            console.log("inMoves");
+            console.log(validMove);
             let move = this.chess.move({ from: this.lastClick.tile, to: tileCoord });
             if (move) {
                 let state = this.clearHighlight(this.getBoardFromFen(this.chess.fen()));
@@ -283,90 +316,100 @@ class ChessBoard extends React.Component<{}, ChessBoardState> {
     }
 
     render() {
-        return (
-            <div className="ChessBoard">
-                <div className="column 8">
-                    <Tile cName="odd" tileInfo={this.state.a8} onClick={() => this.onClick("a8")} />
-                    <Tile cName="even" tileInfo={this.state.b8} onClick={() => this.onClick("b8")} />
-                    <Tile cName="odd" tileInfo={this.state.c8} onClick={() => this.onClick("c8")} />
-                    <Tile cName="even" tileInfo={this.state.d8} onClick={() => this.onClick("d8")} />
-                    <Tile cName="odd" tileInfo={this.state.e8} onClick={() => this.onClick("e8")} />
-                    <Tile cName="even" tileInfo={this.state.f8} onClick={() => this.onClick("f8")} />
-                    <Tile cName="odd" tileInfo={this.state.g8} onClick={() => this.onClick("g8")} />
-                    <Tile cName="even" tileInfo={this.state.h8} onClick={() => this.onClick("h8")} />
+        return this.state.showModal ?
+            (
+                <div className="ChessBoard">
+                    <Modal title="Choose the promotion piece" modalClass="PromotionModal">
+                        {}
+                        {/* Need to add chess pieces here, dynamically choose between w and b */}
+                    </Modal>
                 </div>
-                <div className="column 7">
-                    <Tile cName="even" tileInfo={this.state.a7} onClick={() => this.onClick("a7")} />
-                    <Tile cName="odd" tileInfo={this.state.b7} onClick={() => this.onClick("b7")} />
-                    <Tile cName="even" tileInfo={this.state.c7} onClick={() => this.onClick("c7")} />
-                    <Tile cName="odd" tileInfo={this.state.d7} onClick={() => this.onClick("d7")} />
-                    <Tile cName="even" tileInfo={this.state.e7} onClick={() => this.onClick("e7")} />
-                    <Tile cName="odd" tileInfo={this.state.f7} onClick={() => this.onClick("f7")} />
-                    <Tile cName="even" tileInfo={this.state.g7} onClick={() => this.onClick("g7")} />
-                    <Tile cName="odd" tileInfo={this.state.h7} onClick={() => this.onClick("h7")} />
+            )
+            :
+            (
+                <div className="ChessBoard">
+                    <div className="column 8">
+                        <Tile cName="odd" tileInfo={this.state.a8} onClick={() => this.onClick("a8")} />
+                        <Tile cName="even" tileInfo={this.state.b8} onClick={() => this.onClick("b8")} />
+                        <Tile cName="odd" tileInfo={this.state.c8} onClick={() => this.onClick("c8")} />
+                        <Tile cName="even" tileInfo={this.state.d8} onClick={() => this.onClick("d8")} />
+                        <Tile cName="odd" tileInfo={this.state.e8} onClick={() => this.onClick("e8")} />
+                        <Tile cName="even" tileInfo={this.state.f8} onClick={() => this.onClick("f8")} />
+                        <Tile cName="odd" tileInfo={this.state.g8} onClick={() => this.onClick("g8")} />
+                        <Tile cName="even" tileInfo={this.state.h8} onClick={() => this.onClick("h8")} />
+                    </div>
+                    <div className="column 7">
+                        <Tile cName="even" tileInfo={this.state.a7} onClick={() => this.onClick("a7")} />
+                        <Tile cName="odd" tileInfo={this.state.b7} onClick={() => this.onClick("b7")} />
+                        <Tile cName="even" tileInfo={this.state.c7} onClick={() => this.onClick("c7")} />
+                        <Tile cName="odd" tileInfo={this.state.d7} onClick={() => this.onClick("d7")} />
+                        <Tile cName="even" tileInfo={this.state.e7} onClick={() => this.onClick("e7")} />
+                        <Tile cName="odd" tileInfo={this.state.f7} onClick={() => this.onClick("f7")} />
+                        <Tile cName="even" tileInfo={this.state.g7} onClick={() => this.onClick("g7")} />
+                        <Tile cName="odd" tileInfo={this.state.h7} onClick={() => this.onClick("h7")} />
+                    </div>
+                    <div className="column 6">
+                        <Tile cName="odd" tileInfo={this.state.a6} onClick={() => this.onClick("a6")} />
+                        <Tile cName="even" tileInfo={this.state.b6} onClick={() => this.onClick("b6")} />
+                        <Tile cName="odd" tileInfo={this.state.c6} onClick={() => this.onClick("c6")} />
+                        <Tile cName="even" tileInfo={this.state.d6} onClick={() => this.onClick("d6")} />
+                        <Tile cName="odd" tileInfo={this.state.e6} onClick={() => this.onClick("e6")} />
+                        <Tile cName="even" tileInfo={this.state.f6} onClick={() => this.onClick("f6")} />
+                        <Tile cName="odd" tileInfo={this.state.g6} onClick={() => this.onClick("g6")} />
+                        <Tile cName="even" tileInfo={this.state.h6} onClick={() => this.onClick("h6")} />
+                    </div>
+                    <div className="column 5">
+                        <Tile cName="even" tileInfo={this.state.a5} onClick={() => this.onClick("a5")} />
+                        <Tile cName="odd" tileInfo={this.state.b5} onClick={() => this.onClick("b5")} />
+                        <Tile cName="even" tileInfo={this.state.c5} onClick={() => this.onClick("c5")} />
+                        <Tile cName="odd" tileInfo={this.state.d5} onClick={() => this.onClick("d5")} />
+                        <Tile cName="even" tileInfo={this.state.e5} onClick={() => this.onClick("e5")} />
+                        <Tile cName="odd" tileInfo={this.state.f5} onClick={() => this.onClick("f5")} />
+                        <Tile cName="even" tileInfo={this.state.g5} onClick={() => this.onClick("g5")} />
+                        <Tile cName="odd" tileInfo={this.state.h5} onClick={() => this.onClick("h5")} />
+                    </div>
+                    <div className="column 4">
+                        <Tile cName="odd" tileInfo={this.state.a4} onClick={() => this.onClick("a4")} />
+                        <Tile cName="even" tileInfo={this.state.b4} onClick={() => this.onClick("b4")} />
+                        <Tile cName="odd" tileInfo={this.state.c4} onClick={() => this.onClick("c4")} />
+                        <Tile cName="even" tileInfo={this.state.d4} onClick={() => this.onClick("d4")} />
+                        <Tile cName="odd" tileInfo={this.state.e4} onClick={() => this.onClick("e4")} />
+                        <Tile cName="even" tileInfo={this.state.f4} onClick={() => this.onClick("f4")} />
+                        <Tile cName="odd" tileInfo={this.state.g4} onClick={() => this.onClick("g4")} />
+                        <Tile cName="even" tileInfo={this.state.h4} onClick={() => this.onClick("h4")} />
+                    </div>
+                    <div className="column 3">
+                        <Tile cName="even" tileInfo={this.state.a3} onClick={() => this.onClick("a3")} />
+                        <Tile cName="odd" tileInfo={this.state.b3} onClick={() => this.onClick("b3")} />
+                        <Tile cName="even" tileInfo={this.state.c3} onClick={() => this.onClick("c3")} />
+                        <Tile cName="odd" tileInfo={this.state.d3} onClick={() => this.onClick("d3")} />
+                        <Tile cName="even" tileInfo={this.state.e3} onClick={() => this.onClick("e3")} />
+                        <Tile cName="odd" tileInfo={this.state.f3} onClick={() => this.onClick("f3")} />
+                        <Tile cName="even" tileInfo={this.state.g3} onClick={() => this.onClick("g3")} />
+                        <Tile cName="odd" tileInfo={this.state.h3} onClick={() => this.onClick("h3")} />
+                    </div>
+                    <div className="column 2">
+                        <Tile cName="odd" tileInfo={this.state.a2} onClick={() => this.onClick("a2")} />
+                        <Tile cName="even" tileInfo={this.state.b2} onClick={() => this.onClick("b2")} />
+                        <Tile cName="odd" tileInfo={this.state.c2} onClick={() => this.onClick("c2")} />
+                        <Tile cName="even" tileInfo={this.state.d2} onClick={() => this.onClick("d2")} />
+                        <Tile cName="odd" tileInfo={this.state.e2} onClick={() => this.onClick("e2")} />
+                        <Tile cName="even" tileInfo={this.state.f2} onClick={() => this.onClick("f2")} />
+                        <Tile cName="odd" tileInfo={this.state.g2} onClick={() => this.onClick("g2")} />
+                        <Tile cName="even" tileInfo={this.state.h2} onClick={() => this.onClick("h2")} />
+                    </div>
+                    <div className="column 1">
+                        <Tile cName="even" tileInfo={this.state.a1} onClick={() => this.onClick("a1")} />
+                        <Tile cName="odd" tileInfo={this.state.b1} onClick={() => this.onClick("b1")} />
+                        <Tile cName="even" tileInfo={this.state.c1} onClick={() => this.onClick("c1")} />
+                        <Tile cName="odd" tileInfo={this.state.d1} onClick={() => this.onClick("d1")} />
+                        <Tile cName="even" tileInfo={this.state.e1} onClick={() => this.onClick("e1")} />
+                        <Tile cName="odd" tileInfo={this.state.f1} onClick={() => this.onClick("f1")} />
+                        <Tile cName="even" tileInfo={this.state.g1} onClick={() => this.onClick("g1")} />
+                        <Tile cName="odd" tileInfo={this.state.h1} onClick={() => this.onClick("h1")} />
+                    </div>
                 </div>
-                <div className="column 6">
-                    <Tile cName="odd" tileInfo={this.state.a6} onClick={() => this.onClick("a6")} />
-                    <Tile cName="even" tileInfo={this.state.b6} onClick={() => this.onClick("b6")} />
-                    <Tile cName="odd" tileInfo={this.state.c6} onClick={() => this.onClick("c6")} />
-                    <Tile cName="even" tileInfo={this.state.d6} onClick={() => this.onClick("d6")} />
-                    <Tile cName="odd" tileInfo={this.state.e6} onClick={() => this.onClick("e6")} />
-                    <Tile cName="even" tileInfo={this.state.f6} onClick={() => this.onClick("f6")} />
-                    <Tile cName="odd" tileInfo={this.state.g6} onClick={() => this.onClick("g6")} />
-                    <Tile cName="even" tileInfo={this.state.h6} onClick={() => this.onClick("h6")} />
-                </div>
-                <div className="column 5">
-                    <Tile cName="even" tileInfo={this.state.a5} onClick={() => this.onClick("a5")} />
-                    <Tile cName="odd" tileInfo={this.state.b5} onClick={() => this.onClick("b5")} />
-                    <Tile cName="even" tileInfo={this.state.c5} onClick={() => this.onClick("c5")} />
-                    <Tile cName="odd" tileInfo={this.state.d5} onClick={() => this.onClick("d5")} />
-                    <Tile cName="even" tileInfo={this.state.e5} onClick={() => this.onClick("e5")} />
-                    <Tile cName="odd" tileInfo={this.state.f5} onClick={() => this.onClick("f5")} />
-                    <Tile cName="even" tileInfo={this.state.g5} onClick={() => this.onClick("g5")} />
-                    <Tile cName="odd" tileInfo={this.state.h5} onClick={() => this.onClick("h5")} />
-                </div>
-                <div className="column 4">
-                    <Tile cName="odd" tileInfo={this.state.a4} onClick={() => this.onClick("a4")} />
-                    <Tile cName="even" tileInfo={this.state.b4} onClick={() => this.onClick("b4")} />
-                    <Tile cName="odd" tileInfo={this.state.c4} onClick={() => this.onClick("c4")} />
-                    <Tile cName="even" tileInfo={this.state.d4} onClick={() => this.onClick("d4")} />
-                    <Tile cName="odd" tileInfo={this.state.e4} onClick={() => this.onClick("e4")} />
-                    <Tile cName="even" tileInfo={this.state.f4} onClick={() => this.onClick("f4")} />
-                    <Tile cName="odd" tileInfo={this.state.g4} onClick={() => this.onClick("g4")} />
-                    <Tile cName="even" tileInfo={this.state.h4} onClick={() => this.onClick("h4")} />
-                </div>
-                <div className="column 3">
-                    <Tile cName="even" tileInfo={this.state.a3} onClick={() => this.onClick("a3")} />
-                    <Tile cName="odd" tileInfo={this.state.b3} onClick={() => this.onClick("b3")} />
-                    <Tile cName="even" tileInfo={this.state.c3} onClick={() => this.onClick("c3")} />
-                    <Tile cName="odd" tileInfo={this.state.d3} onClick={() => this.onClick("d3")} />
-                    <Tile cName="even" tileInfo={this.state.e3} onClick={() => this.onClick("e3")} />
-                    <Tile cName="odd" tileInfo={this.state.f3} onClick={() => this.onClick("f3")} />
-                    <Tile cName="even" tileInfo={this.state.g3} onClick={() => this.onClick("g3")} />
-                    <Tile cName="odd" tileInfo={this.state.h3} onClick={() => this.onClick("h3")} />
-                </div>
-                <div className="column 2">
-                    <Tile cName="odd" tileInfo={this.state.a2} onClick={() => this.onClick("a2")} />
-                    <Tile cName="even" tileInfo={this.state.b2} onClick={() => this.onClick("b2")} />
-                    <Tile cName="odd" tileInfo={this.state.c2} onClick={() => this.onClick("c2")} />
-                    <Tile cName="even" tileInfo={this.state.d2} onClick={() => this.onClick("d2")} />
-                    <Tile cName="odd" tileInfo={this.state.e2} onClick={() => this.onClick("e2")} />
-                    <Tile cName="even" tileInfo={this.state.f2} onClick={() => this.onClick("f2")} />
-                    <Tile cName="odd" tileInfo={this.state.g2} onClick={() => this.onClick("g2")} />
-                    <Tile cName="even" tileInfo={this.state.h2} onClick={() => this.onClick("h2")} />
-                </div>
-                <div className="column 1">
-                    <Tile cName="even" tileInfo={this.state.a1} onClick={() => this.onClick("a1")} />
-                    <Tile cName="odd" tileInfo={this.state.b1} onClick={() => this.onClick("b1")} />
-                    <Tile cName="even" tileInfo={this.state.c1} onClick={() => this.onClick("c1")} />
-                    <Tile cName="odd" tileInfo={this.state.d1} onClick={() => this.onClick("d1")} />
-                    <Tile cName="even" tileInfo={this.state.e1} onClick={() => this.onClick("e1")} />
-                    <Tile cName="odd" tileInfo={this.state.f1} onClick={() => this.onClick("f1")} />
-                    <Tile cName="even" tileInfo={this.state.g1} onClick={() => this.onClick("g1")} />
-                    <Tile cName="odd" tileInfo={this.state.h1} onClick={() => this.onClick("h1")} />
-                </div>
-            </div>
-        );
+            );
     }
 }
 
